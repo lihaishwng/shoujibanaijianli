@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>李海胜 · AI产品经理 | 智能简历助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #f0f2f5;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', Roboto, Helvetica, Arial, sans-serif;
+            padding: 0;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        /* 主简历容器 - 移动端优先但桌面也舒适 */
+        .resume-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px 16px 100px;
+        }
+
+        /* 简历卡片 */
+        .resume-card {
+            background: #ffffff;
+            border-radius: 36px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .resume-header {
+            background: linear-gradient(135deg, #0F2B42 0%, #1E4A6F 100%);
+            padding: 32px 28px 28px;
+            color: white;
+            position: relative;
+        }
+        .resume-header::before {
+            content: "✨";
+            position: absolute;
+            bottom: 20px;
+            right: 25px;
+            font-size: 70px;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+        .name-badge {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .name {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        .job-title {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px);
+            padding: 6px 14px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .info-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin: 14px 0 8px;
+            font-size: 0.85rem;
+            opacity: 0.92;
+        }
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .avatar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 18px;
+        }
+        .avatar-placeholder {
+            width: 52px;
+            height: 52px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            backdrop-filter: blur(4px);
+        }
+
+        .card-section {
+            padding: 24px 28px;
+            border-bottom: 1px solid #edf2f7;
+        }
+        .card-section:last-child {
+            border-bottom: none;
+        }
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #0f2b42;
+            border-left: 4px solid #2d7a9e;
+            padding-left: 14px;
+        }
+        .badge-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .badge {
+            background: #eef2ff;
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #1e4a6f;
+        }
+        .desc-text {
+            font-size: 0.88rem;
+            line-height: 1.5;
+            color: #334155;
+            margin-top: 8px;
+        }
+        .exp-item, .project-item {
+            margin-bottom: 24px;
+        }
+        .exp-header {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .exp-role {
+            color: #0f2b42;
+        }
+        .exp-date {
+            font-weight: normal;
+            font-size: 0.75rem;
+            color: #6c86a3;
+        }
+        .exp-detail {
+            padding-left: 10px;
+            border-left: 2px solid #e2e8f0;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+        .exp-detail ul {
+            margin-left: 18px;
+            margin-top: 4px;
+        }
+        .exp-detail li {
+            margin-bottom: 6px;
+        }
+        .project-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #0f2b42;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+        .project-meta {
+            font-size: 0.7rem;
+            color: #5f7f9e;
+            margin-bottom: 8px;
+        }
+
+        /* 悬浮球 */
+        .ai-float-btn {
+            position: fixed;
+            bottom: 28px;
+            right: 20px;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(145deg, #1E5A7F, #0F3B52);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.2s, box-shadow 0.2s;
+            color: white;
+        }
+        .ai-float-btn:hover {
+            transform: scale(1.02);
+        }
+        .float-icon {
+            font-size: 28px;
+            line-height: 1;
+        }
+        .float-label {
+            font-size: 9px;
+            font-weight: 500;
+            margin-top: 2px;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 6px;
+            border-radius: 20px;
+        }
+        .float-tip {
+            position: absolute;
+            bottom: 75px;
+            right: 10px;
+            background: #1e293b;
+            color: white;
+            font-size: 11px;
+            padding: 6px 12px;
+            border-radius: 24px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            pointer-events: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+        .float-tip::after {
+            content: "";
+            position: absolute;
+            bottom: -6px;
+            right: 20px;
+            border-width: 6px 6px 0 6px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent;
+        }
+
+        /* 全屏AI弹窗覆盖层 */
+        .ai-full-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s;
+            box-shadow: none;
+            border-radius: 0;
+        }
+        .ai-full-modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-header {
+            padding: 18px 20px;
+            background: #ffffff;
+            border-bottom: 1px solid #eef2f8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #0f2b42;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+        }
+        .modal-header span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 26px;
+            cursor: pointer;
+            color: #8ba0bc;
+            padding: 0 8px;
+            line-height: 1;
+        }
+        .chat-messages-full {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: #fafcff;
+        }
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 88%;
+        }
+        .message.user {
+            align-items: flex-end;
+            align-self: flex-end;
+        }
+        .message.ai {
+            align-items: flex-start;
+            align-self: flex-start;
+        }
+        .bubble {
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            line-height: 1.45;
+            word-break: break-word;
+            white-space: pre-wrap;
+            text-align: left;
+        }
+        .user .bubble {
+            background: #1E5A7F;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .ai .bubble {
+            background: #eef2ff;
+            color: #1e293b;
+            border-bottom-left-radius: 4px;
+        }
+        .msg-time {
+            font-size: 0.6rem;
+            color: #94a3b8;
+            margin-top: 4px;
+            margin-left: 6px;
+            margin-right: 6px;
+        }
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 10px 14px;
+            background: #eef2ff;
+            border-radius: 20px;
+            width: fit-content;
+            align-items: center;
+        }
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: #5b6e8c;
+            border-radius: 50%;
+            animation: blink 1.4s infinite;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink {
+            0%, 60%, 100% { opacity: 0.4; transform: translateY(0);}
+            30% { opacity: 1; transform: translateY(-4px);}
+        }
+        .input-panel {
+            padding: 12px 16px 20px;
+            border-top: 1px solid #edf2f7;
+            background: white;
+        }
+        .input-wrap {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        .input-wrap textarea {
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            border-radius: 26px;
+            padding: 10px 16px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            resize: none;
+            outline: none;
+            max-height: 100px;
+            background: #ffffff;
+        }
+        .input-wrap textarea:focus {
+            border-color: #1E5A7F;
+            box-shadow: 0 0 0 2px rgba(30,90,127,0.1);
+        }
+        .send-chat {
+            background: #1E5A7F;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 20px;
+            color: white;
+            font-weight: 500;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .send-chat:disabled {
+            background: #9aaebf;
+        }
+        .quick-chips {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+        .chip {
+            background: #f1f5f9;
+            border: none;
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            color: #1E5A7F;
+            cursor: pointer;
+        }
+
+        @media (max-width: 640px) {
+            .resume-wrapper {
+                padding: 12px 12px 90px;
+            }
+            .card-section {
+                padding: 20px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="resume-wrapper">
+    <div class="resume-card">
+        <!-- 头部 -->
+        <div class="resume-header">
+            <div class="name-badge">
+                <div class="name">李海胜</div>
+                <div class="job-title">AI 产品经理</div>
+            </div>
+            <div class="info-row">
+                <div class="info-item">📅 6年经验</div>
+                <div class="info-item">💰 面议</div>
+                <div class="info-item">📍 不限</div>
+                <div class="info-item">📞 18269558047</div>
+                <div class="info-item">✉️ 2434971832@qq.com</div>
+            </div>
+            <div class="avatar-wrap">
+                <div class="avatar-placeholder">🚀</div>
+                <div style="font-size:0.85rem; opacity:0.9;">AI产品专家 · 全栈技术 + 大模型落地</div>
+            </div>
+        </div>
+
+        <!-- 个人优势 -->
+        <div class="card-section">
+            <div class="section-title">✨ 个人优势</div>
+            <div class="badge-group">
+                <div class="badge">🤖 AI客服0-1落地</div>
+                <div class="badge">📚 RAG + Prompt工程</div>
+                <div class="badge">💻 技术+产品复合背景</div>
+                <div class="badge">📊 数据驱动迭代</div>
+            </div>
+            <div class="desc-text">
+                ✔ 深耕LLM大模型应用，熟练运用RAG知识库、Agent对话闭环，完整智能客服产品0-1搭建经验。<br>
+                ✔ 兼具PC/移动端前端+鸿蒙全栈技术功底，精准评估AI能力边界，高效协同算法/研发团队。<br>
+                ✔ 精通覆盖率、解决率、转人工率等指标体系，数据驱动AI服务持续优化。
+            </div>
+        </div>
+
+        <!-- 工作经历 -->
+        <div class="card-section">
+            <div class="section-title">💼 工作经历</div>
+            <div class="exp-item">
+                <div class="exp-header"><span class="exp-role">深圳横特科技有限公司 · AI产品经理</span><span class="exp-date">2025.05 - 至今</span></div>
+                <div class="exp-detail"><ul><li><strong>AI智能客服落地</strong>：主导0-1搭建，覆盖多业务场景，自助解决率提升，降本增效显著。</li><li><strong>云盘AI助手设计</strong>：对话式文件管理，查找效率提升52.8%。</li><li><strong>跨团队协同</strong>：依托技术背景精准评估可行性，推动AI产品全周期落地。</li></ul></div>
+            </div>
+            <div class="exp-item">
+                <div class="exp-header"><span class="exp-role">深圳横特科技有限公司 · 前端开发工程师</span><span class="exp-date">2020.11 - 2025.05</span></div>
+                <div class="exp-detail"><ul><li>负责PC/移动端/Android/鸿蒙应用开发，参与产品全流程。</li><li>扎实技术功底，沉淀「技术+产品」复合视角，高效协同算法团队落地。</li></ul></div>
+            </div>
+        </div>
+
+        <!-- 项目经验 -->
+        <div class="card-section">
+            <div class="section-title">🚀 项目经验</div>
+            <div class="project-item">
+                <div class="project-title">AI 智能客服 <span style="font-size:0.7rem; font-weight:normal;">2025.11 - 2026.04</span></div>
+                <div class="project-meta">全链路0-1 · RAG知识库 · MCP协议集成</div>
+                <div class="exp-detail"><ul><li>意图识别准确率78% → 92.3%，响应效率↑35.7%</li><li>构建RAG知识库，模型幻觉降低81.2%，转人工率下降38%</li><li>自动解决率达82%，客服人力成本降低32.4%</li></ul></div>
+            </div>
+            <div class="project-item">
+                <div class="project-title">云盘 AI 助手 <span style="font-size:0.7rem; font-weight:normal;">2025.06 - 2025.10</span></div>
+                <div class="project-meta">对话式交互 · 意图识别 · 深度集成</div>
+                <div class="exp-detail"><ul><li>文件查找效率↑52.8%，上传/下载步骤减少63.6%</li><li>核心功能使用率提升25%，形成可复用AI落地方法论</li></ul></div>
+            </div>
+        </div>
+
+        <!-- 教育背景 -->
+        <div class="card-section">
+            <div class="section-title">🎓 教育背景</div>
+            <div><strong>桂林电子科技大学</strong> · 2017.09 - 2020.06</div>
+            <div class="desc-text" style="margin-top:6px;">全日制专科 · 市场营销专业</div>
+        </div>
+    </div>
+</div>
+
+<!-- 悬浮球 -->
+<div class="ai-float-btn" id="floatBtn">
+    <div class="float-icon">🤖</div>
+    <div class="float-label">AI面试</div>
+    <div class="float-tip" id="floatTip">点击开启AI面试</div>
+</div>
+
+<!-- 全屏AI聊天弹窗 -->
+<div class="ai-full-modal" id="aiFullModal">
+    <div class="modal-header">
+        <span>🤖 AI 简历助手 · 李海胜</span>
+        <button class="close-modal" id="closeFullModal">✕</button>
+    </div>
+    <div class="chat-messages-full" id="fullChatMessages">
+        <div class="message ai">
+            <div class="bubble">面试官您好，我是李海胜，今天很荣幸能和您交流，也非常期待能加入咱们团队。</div>
+            <div class="msg-time">刚刚</div>
+        </div>
+    </div>
+    <div class="input-panel">
+        <div class="input-wrap">
+            <textarea id="fullChatInput" rows="1" placeholder="输入消息，与AI面试官对话..."></textarea>
+            <button class="send-chat" id="sendFullBtn">发送</button>
+        </div>
+        <div class="quick-chips">
+            <button class="chip" data-msg="简单自我介绍一下">📌 自我介绍</button>
+            <button class="chip" data-msg="AI智能客服的核心成果有哪些？">🤖 AI客服成果</button>
+            <button class="chip" data-msg="你的技术背景如何赋能AI产品？">⚙️ 技术+产品</button>
+            <button class="chip" data-msg="云盘AI助手的亮点和效果">☁️ 云盘亮点</button>
+        </div>
+        <div style="font-size: 10px; text-align:center; margin-top: 10px; color:#8ba0bc;"></div>
+    </div>
+</div>
+
+<script>
+    // ---------- Coze API 配置 (保证真实接口) ----------
+    const COZE_API_URL = 'https://api.coze.cn/v1/workflow/stream_run';
+    const COZE_TOKEN = 'pat_4BF8f3zaROm8Eb7A31LkxyI6k06OkiH8fJHFYJu4R75aMF0ifT2bLPULey06dNWI';
+    const WORKFLOW_ID = '7642274663434813492';
+
+    // DOM 元素
+    const fullModal = document.getElementById('aiFullModal');
+    const floatBtn = document.getElementById('floatBtn');
+    const closeFullBtn = document.getElementById('closeFullModal');
+    const fullMessagesDiv = document.getElementById('fullChatMessages');
+    const fullInput = document.getElementById('fullChatInput');
+    const sendFullBtn = document.getElementById('sendFullBtn');
+    const chips = document.querySelectorAll('.chip');
+
+    let isWaiting = false;
+    let currentAbortController = null;
+
+    // 打开全屏弹窗
+    function openModal() {
+        fullModal.classList.add('open');
+        const tip = document.getElementById('floatTip');
+        if (tip) tip.style.opacity = '0';
+        fullInput.focus();
+    }
+    function closeModal() {
+        fullModal.classList.remove('open');
+        const tip = document.getElementById('floatTip');
+        if (tip) tip.style.opacity = '1';
+        // 若有请求则中断?
+        if (currentAbortController) {
+            currentAbortController.abort();
+            currentAbortController = null;
+        }
+        isWaiting = false;
+        sendFullBtn.disabled = false;
+    }
+
+    floatBtn.addEventListener('click', openModal);
+    closeFullBtn.addEventListener('click', closeModal);
+    // 点击背景可关闭（点击模态自身关闭可选，但为避免误触，只通过关闭按钮）
+    window.addEventListener('click', (e) => {
+        if (fullModal.classList.contains('open') && e.target === fullModal) {
+            closeModal();
+        }
+    });
+
+    // 添加消息到全屏聊天区
+    function addMessageToFull(role, textContent) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message', role);
+        const bubble = document.createElement('div');
+        bubble.classList.add('bubble');
+        bubble.style.textAlign = 'left';
+        bubble.innerHTML = (textContent || '').replace(/\n/g, '<br>');
+        msgDiv.appendChild(bubble);
+        const timeSpan = document.createElement('div');
+        timeSpan.classList.add('msg-time');
+        timeSpan.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        msgDiv.appendChild(timeSpan);
+        fullMessagesDiv.appendChild(msgDiv);
+        fullMessagesDiv.scrollTop = fullMessagesDiv.scrollHeight;
+        return msgDiv;
+    }
+
+    // 显示打字指示器
+    let typingIndicatorElement = null;
+    function showTypingFull() {
+        if (typingIndicatorElement) return;
+        const wrap = document.createElement('div');
+        wrap.classList.add('message', 'ai');
+        const indicator = document.createElement('div');
+        indicator.classList.add('typing-indicator');
+        indicator.innerHTML = '<span></span><span></span><span></span>';
+        wrap.appendChild(indicator);
+        const fakeTime = document.createElement('div');
+        fakeTime.classList.add('msg-time');
+        fakeTime.innerText = 'AI 正在思考...';
+        wrap.appendChild(fakeTime);
+        fullMessagesDiv.appendChild(wrap);
+        typingIndicatorElement = wrap;
+        fullMessagesDiv.scrollTop = fullMessagesDiv.scrollHeight;
+    }
+    function hideTypingFull() {
+        if (typingIndicatorElement) {
+            typingIndicatorElement.remove();
+            typingIndicatorElement = null;
+        }
+    }
+
+    // 核心流式请求 - 完全使用接口返回数据，无本地硬编码
+    async function callCozeAPIStream(userInput) {
+        const requestBody = {
+            workflow_id: WORKFLOW_ID,
+            parameters: { input: userInput }
+        };
+        // 创建新的AbortController
+        if (currentAbortController) {
+            currentAbortController.abort();
+        }
+        currentAbortController = new AbortController();
+        const signal = currentAbortController.signal;
+
+        try {
+            const response = await fetch(COZE_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${COZE_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody),
+                signal: signal,
+                mode: 'cors'
+            });
+            if (!response.ok) {
+                throw new Error(`API 响应错误: ${response.status}`);
+            }
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let buffer = '';
+            let finalText = '';
+            // 创建一个临时的AI消息气泡，动态更新
+            const tempMessageDiv = document.createElement('div');
+            tempMessageDiv.classList.add('message', 'ai');
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.classList.add('bubble');
+            bubbleDiv.style.textAlign = 'left';
+            bubbleDiv.innerHTML = '';
+            tempMessageDiv.appendChild(bubbleDiv);
+            const timeSpanDiv = document.createElement('div');
+            timeSpanDiv.classList.add('msg-time');
+            timeSpanDiv.innerText = '生成中...';
+            tempMessageDiv.appendChild(timeSpanDiv);
+            fullMessagesDiv.appendChild(tempMessageDiv);
+            let hasContent = false;
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value, { stream: true });
+                buffer += chunk;
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+                for (const line of lines) {
+                    if (line.startsWith('data:')) {
+                        const dataRaw = line.substring(5).trim();
+                        if (dataRaw === '[DONE]') continue;
+                        try {
+                            const parsed = JSON.parse(dataRaw);
+                            // 按照标准返回解析: content 可能是字符串化的JSON
+                            let rawContent = parsed.content || parsed.data || '';
+                            if (rawContent && typeof rawContent === 'string') {
+                                try {
+                                    const innerJson = JSON.parse(rawContent);
+                                    if (innerJson.output && typeof innerJson.output === 'string') {
+                                        finalText = innerJson.output;
+                                        bubbleDiv.innerHTML = finalText.replace(/\n/g, '<br>');
+                                        hasContent = true;
+                                    } else if (innerJson.text) {
+                                        finalText = innerJson.text;
+                                        bubbleDiv.innerHTML = finalText.replace(/\n/g, '<br>');
+                                        hasContent = true;
+                                    } else if (typeof innerJson === 'string') {
+                                        finalText = innerJson;
+                                        bubbleDiv.innerHTML = finalText.replace(/\n/g, '<br>');
+                                        hasContent = true;
+                                    } else if (innerJson.content) {
+                                        finalText = innerJson.content;
+                                        bubbleDiv.innerHTML = finalText.replace(/\n/g, '<br>');
+                                        hasContent = true;
+                                    } else {
+                                        if (!finalText && rawContent) {
+                                            finalText = rawContent;
+                                            bubbleDiv.innerHTML = finalText.replace(/\n/g, '<br>');
+                                            hasContent = true;
+                                        }
+                                    }
+                                } catch (e) {
+                                    // 不是json，直接作为文本
+                                    if (!finalText) finalText = rawContent;
+                                    bubbleDiv.innerHTML = finalText.replace(/\n/g, '<br>');
+                                    hasContent = true;
+                                }
+                            } else if (parsed.output && typeof parsed.output === 'string') {
+                                finalText = parsed.output;
+                                bubbleDiv.innerHTML = finalText.replace(/\n/g, '<br>');
+                                hasContent = true;
+                            } else if (parsed.text) {
+                                finalText = parsed.text;
+                                bubbleDiv.innerHTML = finalText.replace(/\n/g, '<br>');
+                                hasContent = true;
+                            } else if (parsed.message) {
+                                finalText = parsed.message;
+                                bubbleDiv.innerHTML = finalText.replace(/\n/g, '<br>');
+                                hasContent = true;
+                            } else if (parsed.content_type === 'text' && parsed.content) {
+                                let c = parsed.content;
+                                if (typeof c === 'object' && c.output) finalText = c.output;
+                                else if (typeof c === 'string') finalText = c;
+                                else finalText = JSON.stringify(c);
+                                bubbleDiv.innerHTML = finalText.replace(/\n/g, '<br>');
+                                hasContent = true;
+                            }
+                            fullMessagesDiv.scrollTop = fullMessagesDiv.scrollHeight;
+                        } catch (err) {
+                            console.debug("解析数据错误:", err);
+                        }
+                    }
+                }
+            }
+            // 更新消息时间
+            if (tempMessageDiv && tempMessageDiv.querySelector('.msg-time')) {
+                tempMessageDiv.querySelector('.msg-time').innerText = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+            }
+            if (!hasContent || !finalText.trim()) {
+                bubbleDiv.innerHTML = '抱歉，未获取到有效回复，请稍后再试。';
+            }
+            return finalText;
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log("请求已取消");
+                return null;
+            }
+            console.error('Coze请求失败:', error);
+            // 移除可能残留的临时消息
+            const lastChild = fullMessagesDiv.lastChild;
+            if (lastChild && lastChild.classList && lastChild.classList.contains('message') && lastChild.querySelector('.msg-time')?.innerText === '生成中...') {
+                lastChild.remove();
+            }
+            // 显示错误信息，但不再伪造回复内容，只告知接口不通
+            addMessageToFull('ai', `❌ 接口请求失败: ${error.message || '网络错误'}。请检查网络或稍后重试。`);
+            throw error;
+        } finally {
+            currentAbortController = null;
+        }
+    }
+
+    // 发送核心逻辑
+    async function sendMessageToAI(text) {
+        if (!text || text.trim() === '') return;
+        if (isWaiting) {
+            addMessageToFull('ai', '请稍等，我正在回复上一个问题~');
+            return;
+        }
+        addMessageToFull('user', text.trim());
+        fullInput.value = '';
+        autoResizeFull();
+        isWaiting = true;
+        sendFullBtn.disabled = true;
+        showTypingFull();
+        try {
+            await callCozeAPIStream(text.trim());
+        } catch (err) {
+            console.warn(err);
+        } finally {
+            hideTypingFull();
+            isWaiting = false;
+            sendFullBtn.disabled = false;
+            fullMessagesDiv.scrollTop = fullMessagesDiv.scrollHeight;
+        }
+    }
+
+    function autoResizeFull() {
+        const ta = fullInput;
+        ta.style.height = 'auto';
+        ta.style.height = Math.min(ta.scrollHeight, 100) + 'px';
+    }
+
+    sendFullBtn.addEventListener('click', () => {
+        const msg = fullInput.value.trim();
+        if (msg) sendMessageToAI(msg);
+    });
+    fullInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const msg = fullInput.value.trim();
+            if (msg) sendMessageToAI(msg);
+        }
+    });
+    fullInput.addEventListener('input', autoResizeFull);
+    chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            const preset = chip.getAttribute('data-msg');
+            if (preset) sendMessageToAI(preset);
+        });
+    });
+    autoResizeFull();
+</script>
+</body>
+</html>
